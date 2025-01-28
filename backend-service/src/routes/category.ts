@@ -1,5 +1,5 @@
 import { FastifyPluginAsync } from 'fastify';
-import { authenticate } from '../plugins/auth'; // Example auth hook if using JWT
+import { authenticate } from '../plugins/auth';
 
 interface CreateCategoryBody {
   name: string;
@@ -24,9 +24,7 @@ const categoriesRoutes: FastifyPluginAsync = async (fastify) => {
     }
   );
 
-  /**
-   * Get all Categories (Public)
-   */
+   // Get all Categories (Public)
   fastify.get('/categories', async (request, reply) => {
     const categories = await fastify.prisma.category.findMany();
     return categories;
@@ -96,7 +94,6 @@ const categoriesRoutes: FastifyPluginAsync = async (fastify) => {
     async (request, reply) => {
       const { id } = request.params;
 
-      // Optional: Check if category exists before deleting
       const existingCategory = await fastify.prisma.category.findUnique({
         where: { id: Number(id) },
       });

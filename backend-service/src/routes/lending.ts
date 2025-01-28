@@ -1,24 +1,21 @@
 import { FastifyPluginAsync } from 'fastify';
-import { authenticate } from '../plugins/auth'; // if using JWT auth
+import { authenticate } from '../plugins/auth';
 
 interface CreateLendingBody {
   bookId: number;
   memberId: number;
-  dueDate: string;  // or Date, but typically passed as string
+  dueDate: string;
 }
 
 const lendingsRoutes: FastifyPluginAsync = async (fastify) => {
-  /**
-   * POST /lendings
-   * Create a new lending record (borrow a book)
-   */
+
+    // Create a new lending record (borrow a book)
   fastify.post<{ Body: CreateLendingBody }>(
     '/lendings',
     { preHandler: [authenticate] },
     async (request, reply) => {
       const { bookId, memberId, dueDate } = request.body;
 
-      // userId from JWT
       const userId = (request.user as any).id;
 
       const book = await fastify.prisma.book.findUnique({
@@ -29,7 +26,6 @@ const lendingsRoutes: FastifyPluginAsync = async (fastify) => {
         return reply.status(404).send({ error: 'Book not found' });
       }
 
-      // 1. Check the BookStatus for availability
       let bookStatus = await fastify.prisma.bookStatus.findUnique({
         where: { bookId },
       });
@@ -48,14 +44,13 @@ const lendingsRoutes: FastifyPluginAsync = async (fastify) => {
           });
       }
 
-      // 2. If no available copies, reject
+      // If no available book
       if (bookStatus.availableQty < 1) {
         return reply
           .status(400)
           .send({ error: 'No copies available for this book' });
       }
 
-      // 3. Create a new Lending record
       const lending = await fastify.prisma.lending.create({
         data: {
           bookId,
@@ -67,7 +62,6 @@ const lendingsRoutes: FastifyPluginAsync = async (fastify) => {
         },
       });
 
-      // 4. Update BookStatus to reflect the borrowed copy
       await fastify.prisma.bookStatus.update({
         where: { bookId },
         data: {
@@ -82,10 +76,7 @@ const lendingsRoutes: FastifyPluginAsync = async (fastify) => {
   
   
 
-  /**
-   * PUT /lendings/:id/return
-   * Mark a lending record as returned
-   */
+   // Mark a lending record as returned
   fastify.put<{ Params: { id: string } }>(
     '/lendings/:id/return',
     { preHandler: [authenticate] },
@@ -137,10 +128,7 @@ const lendingsRoutes: FastifyPluginAsync = async (fastify) => {
     }
   );
 
-  /**
-   * GET /lendings
-   * Fetch all lending records
-   */
+   // Fetch all lending records
   fastify.get(
     '/lendings',
     { preHandler: [authenticate] },
@@ -156,10 +144,7 @@ const lendingsRoutes: FastifyPluginAsync = async (fastify) => {
     }
   );
 
-  /**
-   * GET /lendings/:id
-   * Get a single lending record by ID
-   */
+   // Get a single lending record by ID
   fastify.get<{ Params: { id: string } }>(
     '/lendings/:id',
     { preHandler: [authenticate] },

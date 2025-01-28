@@ -1,5 +1,5 @@
 import { FastifyPluginAsync } from 'fastify';
-import { authenticate } from '../plugins/auth'; // if you’re using JWT auth
+import { authenticate } from '../plugins/auth';
 
 interface CreateMemberBody {
   name: string;
@@ -16,10 +16,7 @@ interface UpdateMemberBody {
 }
 
 const membersRoutes: FastifyPluginAsync = async (fastify) => {
-  /**
-   * POST /members
-   * Create a new member
-   */
+   // Create a new member
   fastify.post<{ Body: CreateMemberBody }>(
     '/members',
     { preHandler: [authenticate] }, // protect this route if desired
@@ -58,28 +55,17 @@ const membersRoutes: FastifyPluginAsync = async (fastify) => {
     }
   );
 
-  /**
-   * GET /members
-   * List all members
-   */
+   // List all members
   fastify.get(
     '/members',
     { preHandler: [authenticate] }, // or make it public if desired
     async (request, reply) => {
-      const members = await fastify.prisma.member.findMany({
-        include: {
-          user: true,   // to see user info
-          lendings: true, // if you want to see their lendings
-        },
-      });
+      const members = await fastify.prisma.member.findMany();
       return members;
     }
   );
 
-  /**
-   * GET /members/:id
-   * Get a single member by ID
-   */
+   // Get a single member by ID
   fastify.get<{ Params: { id: string } }>(
     '/members/:id',
     { preHandler: [authenticate] },
@@ -88,7 +74,6 @@ const membersRoutes: FastifyPluginAsync = async (fastify) => {
       const member = await fastify.prisma.member.findUnique({
         where: { id: Number(id) },
         include: {
-          user: true,
           lendings: true,
         },
       });
@@ -99,10 +84,7 @@ const membersRoutes: FastifyPluginAsync = async (fastify) => {
     }
   );
 
-  /**
-   * PUT /members/:id
-   * Update an existing member
-   */
+   // Update an existing member
   fastify.put<{ Params: { id: string }; Body: UpdateMemberBody }>(
     '/members/:id',
     { preHandler: [authenticate] },
@@ -110,7 +92,6 @@ const membersRoutes: FastifyPluginAsync = async (fastify) => {
       const { id } = request.params;
       const { name, email, phone, status, joinedDate } = request.body;
 
-      // Optionally check if member exists
       const existingMember = await fastify.prisma.member.findUnique({
         where: { id: Number(id) },
       });
@@ -133,10 +114,7 @@ const membersRoutes: FastifyPluginAsync = async (fastify) => {
     }
   );
 
-  /**
-   * DELETE /members/:id
-   * Delete a member
-   */
+   // Delete a member
   fastify.delete<{ Params: { id: string } }>(
     '/members/:id',
     { preHandler: [authenticate] },

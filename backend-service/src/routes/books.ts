@@ -1,8 +1,6 @@
-// src/routes/books.ts
 import { FastifyPluginAsync } from 'fastify';
 import { authenticate } from '../plugins/auth';
 
-// Define the shape of the request body for creating/updating a book
 interface CreateBookBody {
   title: string;
   author: string;
@@ -27,10 +25,12 @@ const booksRoutes: FastifyPluginAsync = async (fastify, opts) => {
     async (request, reply) => {
       const { title, author, isbn, quantity, categoryId } = request.body;
 
-      // userId from JWT
+      if (!title || !author || !isbn || !quantity) {
+        return reply.status(400).send({ message: 'Title, Author, ISBN, and Quantity are required' });
+      }
+
       const userId = (request.user as any).id;
 
-      // 1. Create the Book
       const newBook = await fastify.prisma.book.create({
         data: {
           title,
@@ -46,9 +46,7 @@ const booksRoutes: FastifyPluginAsync = async (fastify, opts) => {
         },
       });
 
-      // 2. Create or Update BookStatus for this new book
-      //    Because it's a brand new book, we can assume no BookStatus yet.
-      //    But we can upsert just in case.
+      // Create or Update BookStatus for this new book
       await fastify.prisma.bookStatus.upsert({
         where: { bookId: newBook.id },
         update: {
@@ -82,6 +80,12 @@ const booksRoutes: FastifyPluginAsync = async (fastify, opts) => {
             name: true,
           },
         },
+        bookStatus: {
+          select: {
+            availableQty: true,
+            borrowedQty: true,
+          },
+        },
       },
     });
 
@@ -104,6 +108,12 @@ const booksRoutes: FastifyPluginAsync = async (fastify, opts) => {
             name: true,
           },
         },
+        bookStatus: {
+          select: {
+            availableQty: true,
+            borrowedQty: true,
+          },
+        },
       },
     });
     return book;
@@ -116,6 +126,10 @@ const booksRoutes: FastifyPluginAsync = async (fastify, opts) => {
     async (request, reply) => {
       const { id } = request.params;
       const { title, author, isbn, quantity, categoryId } = request.body;
+
+      if (!title || !author || !isbn || !quantity) {
+        return reply.status(400).send({ message: 'Title, Author, ISBN, and Quantity are required' });
+      }
 
       const updatedBook = await fastify.prisma.book.update({
         where: { id: Number(id) },
@@ -142,7 +156,6 @@ const booksRoutes: FastifyPluginAsync = async (fastify, opts) => {
       return updatedBook;
     }
   );
-
 
   // DELETE Book
   fastify.delete<{ Params: { id: string } }>('/books/:id', { preHandler: [authenticate] }, async (request, reply) => {

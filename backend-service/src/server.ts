@@ -8,6 +8,7 @@ import authRoutes from './routes/auth';
 import categoriesRoutes from './routes/category';
 import lendingsRoutes from './routes/lending';
 import membersRoutes from './routes/members';
+import response from './plugins/response';
 
 async function buildServer() {
   const server = Fastify();
@@ -29,6 +30,8 @@ async function buildServer() {
   });
 
   server.register(prismaPlugin);
+  server.register(response);
+
   server.register(booksRoutes);
   server.register(authRoutes);
   server.register(categoriesRoutes);
