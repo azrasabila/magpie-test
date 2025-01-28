@@ -7,6 +7,13 @@ interface CreateLendingBody {
   dueDate: string;
 }
 
+interface LendingQueryParams {
+    search?: string;
+    status?: string;
+    page?: string;
+    pageSize?: string;
+  }
+
 const lendingsRoutes: FastifyPluginAsync = async (fastify) => {
 
     // Create a new lending record (borrow a book)
@@ -83,7 +90,6 @@ const lendingsRoutes: FastifyPluginAsync = async (fastify) => {
     async (request, reply) => {
       const { id } = request.params;
 
-      // Optional: Fetch the lending first to confirm status or existence
       const existing = await fastify.prisma.lending.findUnique({
         where: { id: Number(id) },
       });
@@ -129,18 +135,66 @@ const lendingsRoutes: FastifyPluginAsync = async (fastify) => {
   );
 
    // Fetch all lending records
-  fastify.get(
+   fastify.get<{
+    Querystring: LendingQueryParams;
+  }>(
     '/lendings',
     { preHandler: [authenticate] },
     async (request, reply) => {
+      const { search, status, page = '1', pageSize = '10' } = request.query;
+
+      const pageNumber = parseInt(page, 10) || 1;
+      const pageSizeNumber = parseInt(pageSize, 10) || 10;
+
+      const whereClause: any = {};
+
+      if (status) {
+        whereClause.status = status;
+      }
+
+      if (search) {
+        whereClause.OR = [
+          {
+            book: {
+              title: { contains: search, mode: 'insensitive' },
+            },
+          },
+          {
+            member: {
+              name: { contains: search, mode: 'insensitive' },
+            },
+          },
+        ];
+      }
+
+      const totalCount = await fastify.prisma.lending.count({
+        where: whereClause,
+      });
+
       const lendings = await fastify.prisma.lending.findMany({
-        // Include related data if needed, e.g. book, member:
+        where: whereClause,
+        skip: (pageNumber - 1) * pageSizeNumber,
+        take: pageSizeNumber,
         include: {
           book: true,
           member: true,
         },
+        orderBy: {
+          id: 'desc',
+        },
       });
-      return lendings;
+
+      const totalPages = Math.ceil(totalCount / pageSizeNumber);
+
+      return {
+        pagination: {
+            currentPage: pageNumber,
+            pageSize: pageSizeNumber,
+            totalCount,
+            totalPages,
+        },
+        data: lendings,
+      };
     }
   );
 
