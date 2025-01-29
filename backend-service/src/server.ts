@@ -9,6 +9,7 @@ import categoriesRoutes from './routes/category';
 import lendingsRoutes from './routes/lending';
 import membersRoutes from './routes/members';
 import response from './plugins/response';
+import analyticsRoutes from './routes/analytics';
 
 async function buildServer() {
   const server = Fastify();
@@ -37,6 +38,7 @@ async function buildServer() {
   server.register(categoriesRoutes);
   server.register(lendingsRoutes);
   server.register(membersRoutes);
+  server.register(analyticsRoutes);
 
   return server;
 }
