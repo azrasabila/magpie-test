@@ -10,9 +10,15 @@ import lendingsRoutes from './routes/lending';
 import membersRoutes from './routes/members';
 import response from './plugins/response';
 import analyticsRoutes from './routes/analytics';
+import cors from "@fastify/cors";
 
 async function buildServer() {
   const server = Fastify();
+
+  server.register(cors, {
+    origin: "http://localhost:1212",
+    credentials: true,
+  });
 
   server.register(swagger, {
     prefix: '/swagger',
