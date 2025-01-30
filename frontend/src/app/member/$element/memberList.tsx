@@ -1,20 +1,25 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState, useCallback } from "react";
 import { debounce } from "lodash";
 import { Table, Box, Flex, Text, Button, TextField } from "@radix-ui/themes";
 import { CaretLeftIcon, CaretRightIcon } from "@radix-ui/react-icons";
 import { I_Member, getMemberList } from "@/app/api/getMemberList";
+import ConfirmDialog from "./memberConfirmDialog";
 import MemberDialog from "./memberDialog";
+import { deleteMember } from "@/app/api/deleteMember";
 
 export default function MemberList() {
+    const queryClient = useQueryClient();
     const [page, setPage] = useState(1);
     const [search, setSearch] = useState("");
     const [debouncedSearch, setDebouncedSearch] = useState("");
     const [dialogOpen, setDialogOpen] = useState(false);
     const [dialogMode, setDialogMode] = useState<"add" | "edit">("add");
     const [selectedMember, setSelectedMember] = useState<I_Member | null>(null);
+    const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
+    const [memberToDelete, setMemberToDelete] = useState<I_Member | null>(null);
 
     // Debounce search input
     const debouncedUpdate = useCallback(
@@ -46,6 +51,27 @@ export default function MemberList() {
         setDialogMode("edit");
         setSelectedMember(member);
         setDialogOpen(true);
+    };
+
+    const openDeleteDialog = (member: I_Member) => {
+        setMemberToDelete(member);
+        setConfirmDialogOpen(true);
+    };
+
+    // Mutation to delete a member
+    const deleteMutation = useMutation({
+        mutationFn: async (memberId: number) => await deleteMember(memberId),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["members"] });
+            setConfirmDialogOpen(false);
+            setMemberToDelete(null);
+        },
+    });
+
+    const handleDeleteMember = () => {
+        if (memberToDelete) {
+            deleteMutation.mutate(memberToDelete.id);
+        }
     };
 
     if (isLoading) return <Text className="text-center mt-4">Loading members...</Text>;
@@ -89,7 +115,7 @@ export default function MemberList() {
                             <Table.Cell>
                                 <Flex gap="2">
                                     <Button onClick={() => openEditDialog(member)}>Edit</Button>
-                                    <Button color="red">Delete</Button>
+                                    <Button color="red" onClick={() => openDeleteDialog(member)}>Delete</Button>
                                 </Flex>
                             </Table.Cell>
                         </Table.Row>
@@ -110,6 +136,15 @@ export default function MemberList() {
 
             {/* Member Dialog (Add/Edit) */}
             <MemberDialog open={dialogOpen} onOpenChange={setDialogOpen} mode={dialogMode} member={selectedMember} />
+
+            {/* Confirm Delete Dialog */}
+            <ConfirmDialog
+                open={confirmDialogOpen}
+                onOpenChange={setConfirmDialogOpen}
+                title="Delete Member"
+                description={`Are you sure you want to delete ${memberToDelete?.name}? This action cannot be undone.`}
+                onConfirm={handleDeleteMember}
+            />
         </Box>
     );
 }
