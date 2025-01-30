@@ -1,9 +1,13 @@
-import Image from "next/image";
+import { Flex, Box } from "@radix-ui/themes";
+import MostBorrowedBook from "./$element/mostBorrowedBook";
 
-export default function Dashboard() {
+export default async function Dashboard() {
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      Dashboard
-    </div>
+    <Flex gap="3">
+      <Box width="64px" height="64px">
+        <MostBorrowedBook />
+      </Box>
+    </Flex>
+
   );
 }

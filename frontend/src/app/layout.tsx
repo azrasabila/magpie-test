@@ -4,6 +4,7 @@ import QueryProvider from "@/app/api/queryProvider";
 import Navbar from "./component/navbar";
 import Sidebar from "./component/sidebar";
 import { SAPI_GetToken } from "./utils/token";
+import "@radix-ui/themes/styles.css";
 
 export const metadata: Metadata = {
   title: "Library Management",
@@ -16,7 +17,7 @@ export default async function RootLayout({
   const token = await SAPI_GetToken()
   return (
     <html lang="en">
-      <body className="flex">
+      <body className="flex bg-white text-gray-800">
         <QueryProvider>
           {token ?
             <>
