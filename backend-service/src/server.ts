@@ -1,5 +1,6 @@
 import Fastify from 'fastify';
 import swagger from '@fastify/swagger';
+import swaggerUi from '@fastify/swagger-ui';
 import jwt from '@fastify/jwt';
 
 import prismaPlugin from './plugins/prisma';
@@ -16,24 +17,56 @@ export async function buildServer() {
   const server = Fastify();
 
   server.register(cors, {
-    origin: "http://localhost:1212",
+    origin: "*",
     credentials: true,
   });
 
-  server.register(swagger, {
-    prefix: '/swagger',
-    // openapi: {
-    //   info: {
-    //     title: 'Library API',
-    //     description: 'API documentation for the Digital Library',
-    //     version: '1.0.0',
-    //   },
-    // },
-    // exposeHeadRoutes: true,
+  await server.register(swagger, {
+    openapi: {
+      openapi: '3.0.0',
+      info: {
+        title: 'Test swagger',
+        description: 'Testing the Fastify swagger API',
+        version: '0.1.0'
+      },
+      servers: [
+        {
+          url: 'http://localhost:3000',
+          description: 'Development server'
+        }
+      ],
+      tags: [
+        { name: 'user', description: 'User related end-points' },
+        { name: 'code', description: 'Code related end-points' }
+      ],
+      components: {
+        securitySchemes: {
+          apiKey: {
+            type: 'apiKey',
+            name: 'apiKey',
+            in: 'header'
+          }
+        }
+      },
+      externalDocs: {
+        url: 'https://swagger.io',
+        description: 'Find more info here'
+      }
+    }
+  });
+
+  server.register(swaggerUi, {
+    routePrefix: '/docs',
+    uiConfig: {
+      docExpansion: 'none',
+      deepLinking: false,
+    },
+    staticCSP: true,
+    transformSpecificationClone: true,
   });
 
   server.register(jwt, {
-    secret: 'S3cr3t',
+    secret: process.env.JWT_SECRET ?? '',
   });
 
   server.register(prismaPlugin);
@@ -51,6 +84,8 @@ export async function buildServer() {
 
 async function start() {
   const server = await buildServer();
+  await server.ready();
+  server.swagger();
   try {
     const address = await server.listen({ port: 3000 });
     console.log(`Server listening at ${address}`);

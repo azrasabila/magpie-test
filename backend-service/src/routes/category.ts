@@ -23,6 +23,9 @@ const categoriesRoutes: FastifyPluginAsync = async (fastify) => {
         },
         async (request, reply) => {
             const { name } = request.body;
+            if (!name) {
+                return reply.status(400).send({ error: 'Name is required' });
+            }
             const category = await fastify.prisma.category.create({
                 data: { name },
             });
@@ -75,6 +78,9 @@ const categoriesRoutes: FastifyPluginAsync = async (fastify) => {
         '/categories/:id',
         async (request, reply) => {
             const { id } = request.params;
+            if (!id) {
+                return reply.status(400).send({ error: 'id is required' });
+            }
             const category = await fastify.prisma.category.findUnique({
                 where: { id: Number(id) },
             });
@@ -89,6 +95,9 @@ const categoriesRoutes: FastifyPluginAsync = async (fastify) => {
         '/categories/:id/books',
         async (request, reply) => {
             const { id } = request.params;
+            if (!id) {
+                return reply.status(400).send({ error: 'id is required' });
+            }
             const categoryWithBooks = await fastify.prisma.category.findUnique({
                 where: { id: Number(id) },
                 include: {
@@ -110,8 +119,13 @@ const categoriesRoutes: FastifyPluginAsync = async (fastify) => {
         async (request, reply) => {
             const { id } = request.params;
             const { name } = request.body;
+            if (!id) {
+                return reply.status(400).send({ error: 'id is required' });
+            }
+            if (!name) {
+                return reply.status(400).send({ error: 'name is required' });
+            }
 
-            // Optional: Check if category exists before updating
             const existingCategory = await fastify.prisma.category.findUnique({
                 where: { id: Number(id) },
             });
@@ -134,7 +148,10 @@ const categoriesRoutes: FastifyPluginAsync = async (fastify) => {
         },
         async (request, reply) => {
             const { id } = request.params;
-
+            if (!id) {
+                return reply.status(400).send({ error: 'id is required' });
+            }
+            
             const existingCategory = await fastify.prisma.category.findUnique({
                 where: { id: Number(id) },
             });
