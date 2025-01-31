@@ -12,7 +12,7 @@ import response from './plugins/response';
 import analyticsRoutes from './routes/analytics';
 import cors from "@fastify/cors";
 
-async function buildServer() {
+export async function buildServer() {
   const server = Fastify();
 
   server.register(cors, {
