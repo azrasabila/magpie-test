@@ -94,6 +94,7 @@ export default function LendingDialog({ open, onOpenChange, mode, lending }: Len
         <Flex direction="column" gap="3" className="mt-4">
           <Text>Book</Text>
           <Select.Root
+          disabled={mode === 'edit'}
             value={formData.bookId.toString()}
             onValueChange={(value) => setFormData({ ...formData, bookId: Number(value) })}
           >
@@ -109,6 +110,7 @@ export default function LendingDialog({ open, onOpenChange, mode, lending }: Len
 
           <Text>Member</Text>
           <Select.Root
+            disabled={mode === 'edit'}
             value={formData.memberId.toString()}
             onValueChange={(value) => setFormData({ ...formData, memberId: Number(value) })}
           >

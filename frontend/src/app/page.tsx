@@ -7,15 +7,14 @@ export default function Dashboard() {
   return (
     <Flex direction="column" gap="4">
       <Flex gap="4">
-        <Box flexGrow="1">
+        <Box>
           <MostBorrowedBook />
         </Box>
-        <Box flexGrow="1">
+        <Box>
           <CategoryDistribution />
         </Box>
       </Flex>
 
-      {/* Bottom Row - Full Width */}
       <Box>
         <MonthlyTrend />
       </Box>

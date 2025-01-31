@@ -9,7 +9,7 @@ import { getLendingList, I_Lending } from "@/app/api/getLendingList";
 import { deleteLending } from "@/app/api/deleteLending";
 import LendingDialog from "./lendingDialog";
 import ConfirmDialog from "./lendingConfirmDialog";
-import { format } from "date-fns";
+import { format, isBefore } from "date-fns";
 import { postReturnLending } from "@/app/api/postReturnLending";
 
 export default function LendingList() {
@@ -22,6 +22,7 @@ export default function LendingList() {
     const [selectedLending, setSelectedLending] = useState<I_Lending | null>(null);
     const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
     const [lendingToDelete, setLendingToDelete] = useState<I_Lending | null>(null);
+    const today = new Date();
 
     const debouncedUpdate = useCallback(
         debounce((value) => {
@@ -91,37 +92,47 @@ export default function LendingList() {
                 />
             </Flex>
 
-            <Table.Root className="w-full border rounded-lg">
+            <Table.Root className="w-full border rounded-lg min-w-[800px]">
                 <Table.Header>
                     <Table.Row>
                         <Table.ColumnHeaderCell>Book Name</Table.ColumnHeaderCell>
                         <Table.ColumnHeaderCell>Member Name</Table.ColumnHeaderCell>
                         <Table.ColumnHeaderCell>Borrow Date</Table.ColumnHeaderCell>
+                        <Table.ColumnHeaderCell>Due Date</Table.ColumnHeaderCell>
                         <Table.ColumnHeaderCell>Return Date</Table.ColumnHeaderCell>
                         <Table.ColumnHeaderCell>Status</Table.ColumnHeaderCell>
-                        <Table.ColumnHeaderCell>Action</Table.ColumnHeaderCell>
+                        <Table.ColumnHeaderCell className="sticky right-0 bg-white shadow-md">Action</Table.ColumnHeaderCell>
                     </Table.Row>
                 </Table.Header>
                 <Table.Body>
-                    {data?.data?.map((lending) => (
-                        <Table.Row key={lending.id}>
-                            <Table.Cell>{lending.book.title}</Table.Cell>
-                            <Table.Cell>{lending.member.name}</Table.Cell>
-                            <Table.Cell>{format(new Date(lending.borrowedDate), "dd MMM yyyy")}</Table.Cell>
-                            <Table.Cell>{lending.returnDate ? format(new Date(lending.returnDate), "dd MMM yyyy") : '-'}</Table.Cell>
-                            <Table.Cell>{
-                                lending.status === 'BORROWED' ?
-                                    <Badge color="orange">Borrowed</Badge> :
-                                    <Badge color="green">Returned</Badge>
-                            }</Table.Cell>
-                            <Table.Cell>
-                                <Flex gap="2">
-                                    <Button onClick={() => openEditDialog(lending)}>Edit</Button>
-                                    <Button color="yellow" onClick={() => openDeleteDialog(lending)}>Return</Button>
-                                </Flex>
-                            </Table.Cell>
-                        </Table.Row>
-                    ))}
+                    {data?.data?.map((lending) => {
+                        const dueDate = new Date(lending.dueDate);
+                        const isOverdue = isBefore(dueDate, today) && lending.status === "BORROWED";
+
+                        return (
+                            <Table.Row key={lending.id}>
+                                <Table.Cell>{lending.book.title}</Table.Cell>
+                                <Table.Cell>{lending.member.name}</Table.Cell>
+                                <Table.Cell>{format(new Date(lending.borrowedDate), "dd MMM yyyy")}</Table.Cell>
+                                <Table.Cell>{format(dueDate, "dd MMM yyyy")}</Table.Cell>
+                                <Table.Cell>{lending.returnDate ? format(new Date(lending.returnDate), "dd MMM yyyy") : '-'}</Table.Cell>
+                                <Table.Cell>
+                                    {isOverdue ? (
+                                        <Badge color="red">Overdue</Badge>
+                                    ) : lending.status === "BORROWED" ? (
+                                        <Badge color="orange">Borrowed</Badge>
+                                    ) : (
+                                        <Badge color="green">Returned</Badge>
+                                    )}
+                                </Table.Cell>
+                                <Table.Cell className="sticky right-0 bg-white shadow-md">
+                                    <Flex gap="2">
+                                        <Button color="yellow" onClick={() => openDeleteDialog(lending)}>Return</Button>
+                                    </Flex>
+                                </Table.Cell>
+                            </Table.Row>
+                        );
+                    })}
                 </Table.Body>
             </Table.Root>
 
