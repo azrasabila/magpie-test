@@ -2,10 +2,10 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { login } from "@/app/login/$action/login";
+import { login } from "./login";
 
-export default function LoginPage() {
-  const [username, setUsername] = useState("");
+export default function LoginForm() {
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const router = useRouter();
@@ -13,8 +13,11 @@ export default function LoginPage() {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await login(username, password);
-      router.push("/dashboard");
+      const data = await login(email, password);
+
+      document.cookie = `token=${data.token}; path=/; Secure`;
+
+      window.location.href = "/dashboard";
     } catch (err) {
       setError("Invalid credentials");
     }
@@ -27,9 +30,9 @@ export default function LoginPage() {
         {error && <p className="text-red-500">{error}</p>}
         <input
           type="text"
-          placeholder="Username"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
+          placeholder="Email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
           className="w-full p-2 mb-2 border rounded"
         />
         <input

@@ -16,7 +16,6 @@ export async function deleteLending(id: number): Promise<I_LendingDeleteResponse
     const response: I_BaseResponse<I_LendingDeleteResponse> = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/lendings/${id}`, {
         method: "DELETE",
         headers: {
-            "Content-Type": "application/json",
             "Authorization": `Bearer ${token}`,
         },
     })

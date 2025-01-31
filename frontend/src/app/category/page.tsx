@@ -1,5 +1,5 @@
 import CategoryList from "./$element/categoryList";
 
-export default function CategoriesPage() {
+export default async function CategoriesPage() {
   return <CategoryList />;
 }

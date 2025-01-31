@@ -219,6 +219,39 @@ const lendingsRoutes: FastifyPluginAsync = async (fastify) => {
       return lending;
     }
   );
+
+  fastify.delete<{ Params: { id: string } }>(
+    '/lendings/:id',
+    {
+        preHandler: [authenticate],
+    },
+    async (request, reply) => {
+        const { id } = request.params;
+
+        const existingLending = await fastify.prisma.lending.findUnique({
+            where: { id: Number(id) },
+        });
+        if (!existingLending) {
+            return reply.status(404).send({ error: 'Lending data not found' });
+        }
+
+        if (existingLending.status === 'BORROWED') {
+          await fastify.prisma.bookStatus.update({
+            where: { id: existingLending.bookId },
+            data: {
+              availableQty: { increment: 1 },
+              borrowedQty: { decrement: 1 },
+            },
+          });
+        }
+
+        await fastify.prisma.lending.delete({
+            where: { id: Number(id) },
+        });
+
+        return { message: 'Lending deleted' };
+    }
+);
 };
 
 export default lendingsRoutes;

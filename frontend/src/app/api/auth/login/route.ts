@@ -1,7 +1,9 @@
+"use server"
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 
 export async function POST(req: Request) {
+    const cookie = cookies()
     const { email, password } = await req.json();
     console.log(email)
 
@@ -20,8 +22,7 @@ export async function POST(req: Request) {
     const token = result.data.token;
 
     // Set token as HTTP-only cookie
-    (await
-        cookies()).set("token", token, {
+    (await cookie).set("token", token, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
         sameSite: "lax",

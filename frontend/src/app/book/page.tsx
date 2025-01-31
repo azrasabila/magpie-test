@@ -1,7 +1,5 @@
-"use client";
-
 import BookList from "./$element/bookList";
 
-export default function BookListPage() {
+export default async function BookListPage() {
     return <BookList/>
 }

@@ -1,5 +1,5 @@
 import MemberList from "./$element/memberList";
 
-export default function MemberPage() {
+export default async function MemberPage() {
   return <MemberList />;
 }

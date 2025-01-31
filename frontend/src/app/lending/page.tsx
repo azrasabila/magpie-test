@@ -1,5 +1,5 @@
 import LendingList from "./$element/lendingList";
 
-export default function CategoriesPage() {
+export default async function CategoriesPage() {
   return <LendingList />;
 }

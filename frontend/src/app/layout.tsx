@@ -14,7 +14,8 @@ export const metadata: Metadata = {
 
 export default async function RootLayout({
   children,
-}: Readonly<{ children: React.ReactNode }>) {
+  login
+}: Readonly<{ children: React.ReactNode, login: React.ReactNode }>) {
   const token = await SAPI_GetToken()
   return (
     <html lang="en">
@@ -30,9 +31,7 @@ export default async function RootLayout({
                 </div>
               </div>
             ) : (
-              <main className="flex flex-col items-center justify-center w-full h-screen p-4">
-                {children}
-              </main>
+              login
             )}
           </Theme>
         </QueryProvider>

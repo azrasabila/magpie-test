@@ -18,7 +18,6 @@ export default function Sidebar() {
   return (
     <Collapsible.Root open={open} onOpenChange={setOpen} className="h-screen flex">
       <div className={`h-full flex flex-col bg-gray-900 text-white transition-all ${open ? "w-64" : "w-20"}`}>
-        {/* Header */}
         <div className="p-4 flex items-center justify-between">
           <h1 className={`text-lg font-bold transition-all ${!open && "hidden"}`}>Library</h1>
           <Collapsible.Trigger asChild>
@@ -28,7 +27,6 @@ export default function Sidebar() {
           </Collapsible.Trigger>
         </div>
 
-        {/* Navigation */}
         <nav className="flex-1 space-y-2 p-2">
           <NavItem href="/" icon={<DashboardIcon className="w-5 h-5" />} label="Dashboard" open={open} />
           <NavItem href="/book" icon={<FileTextIcon className="w-5 h-5" />} label="Books" open={open} />

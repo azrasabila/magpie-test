@@ -3,10 +3,10 @@ import type { NextRequest } from "next/server";
 
 export default function middleware(req: NextRequest) {
     const token = req.cookies.get("token")?.value;
-    const isLoginPage = req.nextUrl.pathname === "/login";
+    const isLoginPage = req.nextUrl.pathname === "/";
 
     if (!token && !isLoginPage) {
-        return NextResponse.redirect(new URL("/login", req.url));
+        return NextResponse.redirect(new URL("/", req.url));
     }
 
     if (token && isLoginPage) {

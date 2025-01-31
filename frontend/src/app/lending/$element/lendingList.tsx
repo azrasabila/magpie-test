@@ -11,6 +11,7 @@ import LendingDialog from "./lendingDialog";
 import ConfirmDialog from "./lendingConfirmDialog";
 import { format, isBefore } from "date-fns";
 import { postReturnLending } from "@/app/api/postReturnLending";
+import DeleteDialog from "./lendingDeleteDialog";
 
 export default function LendingList() {
     const queryClient = useQueryClient();
@@ -21,7 +22,9 @@ export default function LendingList() {
     const [dialogMode, setDialogMode] = useState<"add" | "edit">("add");
     const [selectedLending, setSelectedLending] = useState<I_Lending | null>(null);
     const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
+    const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
     const [lendingToDelete, setLendingToDelete] = useState<I_Lending | null>(null);
+    const [lendingToReturn, setLendingToReturn] = useState<I_Lending | null>(null);
     const today = new Date();
 
     const debouncedUpdate = useCallback(
@@ -53,16 +56,30 @@ export default function LendingList() {
         setDialogOpen(true);
     };
 
-    const openDeleteDialog = (lending: I_Lending) => {
-        setLendingToDelete(lending);
+    const openReturnDialog = (lending: I_Lending) => {
+        setLendingToReturn(lending);
         setConfirmDialogOpen(true);
     };
 
-    const deleteMutation = useMutation({
+    const openDeleteDialog = (lending: I_Lending) => {
+        setLendingToDelete(lending);
+        setDeleteDialogOpen(true);
+    };
+
+    const returnMutation = useMutation({
         mutationFn: async (lendingId: number) => await postReturnLending(lendingId),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["lendings"] });
             setConfirmDialogOpen(false);
+            setLendingToReturn(null);
+        },
+    });
+
+    const deleteMutation = useMutation({
+        mutationFn: async (lendingId: number) => await deleteLending(lendingId),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["lendings"] });
+            setDeleteDialogOpen(false);
             setLendingToDelete(null);
         },
     });
@@ -70,6 +87,12 @@ export default function LendingList() {
     const handleDeleteLending = () => {
         if (lendingToDelete) {
             deleteMutation.mutate(lendingToDelete.id);
+        }
+    };
+
+    const handleReturnLending = () => {
+        if (lendingToReturn) {
+            returnMutation.mutate(lendingToReturn.id);
         }
     };
 
@@ -127,7 +150,10 @@ export default function LendingList() {
                                 </Table.Cell>
                                 <Table.Cell className="sticky right-0 bg-white shadow-md">
                                     <Flex gap="2">
-                                        <Button color="yellow" onClick={() => openDeleteDialog(lending)}>Return</Button>
+                                        {lending.status === "BORROWED" &&
+                                            <Button color="yellow" onClick={() => openReturnDialog(lending)}>Return</Button>
+                                        }
+                                        <Button color="red" onClick={() => openDeleteDialog(lending)}>Delete</Button>
                                     </Flex>
                                 </Table.Cell>
                             </Table.Row>
@@ -153,6 +179,14 @@ export default function LendingList() {
                 onOpenChange={setConfirmDialogOpen}
                 title="Return Book"
                 description={`Are you sure you want to return this book?`}
+                onConfirm={handleReturnLending}
+            />
+
+            <DeleteDialog
+                open={deleteDialogOpen}
+                onOpenChange={setDeleteDialogOpen}
+                title="Delete Lending"
+                description={`Are you sure you want to delete this lending?`}
                 onConfirm={handleDeleteLending}
             />
         </Box>

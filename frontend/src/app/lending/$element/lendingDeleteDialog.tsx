@@ -11,7 +11,7 @@ interface ConfirmDialogProps {
   onConfirm: () => void;
 }
 
-export default function ConfirmDialog({ open, onOpenChange, title, description, onConfirm }: ConfirmDialogProps) {
+export default function DeleteDialog({ open, onOpenChange, title, description, onConfirm }: ConfirmDialogProps) {
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog.Overlay className="fixed inset-0 bg-black bg-opacity-50" />
@@ -22,7 +22,7 @@ export default function ConfirmDialog({ open, onOpenChange, title, description, 
           <Dialog.Close asChild>
             <Button>Cancel</Button>
           </Dialog.Close>
-          <Button color="yellow" onClick={onConfirm}>Return</Button>
+          <Button color="red" onClick={onConfirm}>Delete</Button>
         </Flex>
       </Dialog.Content>
     </Dialog.Root>
