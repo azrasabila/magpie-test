@@ -9,6 +9,7 @@ import {
   ArchiveIcon,
   HamburgerMenuIcon,
   PersonIcon,
+  HandIcon,
 } from "@radix-ui/react-icons";
 
 export default function Sidebar() {
@@ -31,6 +32,7 @@ export default function Sidebar() {
         <nav className="flex-1 space-y-2 p-2">
           <NavItem href="/" icon={<DashboardIcon className="w-5 h-5" />} label="Dashboard" open={open} />
           <NavItem href="/book" icon={<FileTextIcon className="w-5 h-5" />} label="Books" open={open} />
+          <NavItem href="/lending" icon={<HandIcon className="w-5 h-5" />} label="Lending" open={open} />
           <NavItem href="/category" icon={<ArchiveIcon className="w-5 h-5" />} label="Categories" open={open} />
           <NavItem href="/member" icon={<PersonIcon className="w-5 h-5" />} label="Member" open={open} />
         </nav>

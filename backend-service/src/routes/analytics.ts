@@ -8,7 +8,7 @@ const analyticsRoutes: FastifyPluginAsync = async (fastify) => {
       by: ['bookId'],
       _count: { bookId: true },
       orderBy: { _count: { bookId: 'desc' } },
-      take: 5,
+      take: 3,
     });
 
     const bookIds = groupData.map((item) => item.bookId);

@@ -1,7 +1,7 @@
 import { I_ResponseListData, I_BaseListResponse } from "@/app/hooks/base"
 import { serialize } from "@/app/utils/querySerialize"
 
-type I_Category = {
+export type I_Category = {
     id: number
     name: string
 }

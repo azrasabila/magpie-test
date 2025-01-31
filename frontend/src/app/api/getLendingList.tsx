@@ -2,23 +2,20 @@ import { serialize } from "@/app/utils/querySerialize";
 import { I_BaseListResponse, I_ResponseListData } from "../hooks/base";
 import { redirect } from "next/navigation";
 import { SAPI_GetToken } from "../utils/token";
+import { I_Book } from "./getBookList";
+import { I_Member } from "./getMemberList";
 
-interface I_LendingCategory {
-    name: string
-}
-
-interface I_LendingStatus {
-    availableQty: number;
-    borrowedQty: number
-}
-
-interface I_Lending {
-    id: string;
-    title: string;
-    author: string;
-    isbn: string;
-    category: I_LendingCategory;
-    LendingStatus: I_LendingStatus;
+export interface I_Lending {
+    id: number;
+    bookId: number;
+    memberId: number;
+    borrowedDate: string;
+    dueDate: string;
+    returnDate: string | null;
+    status: "BORROWED" | "RETURNED";
+    createdBy: number;
+    book: I_Book;
+    member: I_Member;
 }
 
 interface UseLendingsParams {
@@ -28,7 +25,7 @@ interface UseLendingsParams {
     categoryId?: string;
 }
 
-export async function getLendingList(page: string, pageSize: string): Promise<I_ResponseListData<I_Lending> | null> {
+export async function getLendingList(params: UseLendingsParams): Promise<I_ResponseListData<I_Lending> | null> {
     const token = await SAPI_GetToken()
 
     if (!token) {
@@ -36,13 +33,13 @@ export async function getLendingList(page: string, pageSize: string): Promise<I_
     }
 
     const query = {
-        page: page || "1",
-        pageSize: pageSize || "10",
-        search: "",
-        categoryId: ""
+        page: params.page?.toString() || "1",
+        pageSize: params.pageSize?.toString() || "10",
+        search: params.search || "",
+        categoryId: params.categoryId || ""
     }
     const queryString = serialize(query)
-    const response: I_BaseListResponse<I_Lending> = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/Lendings?${queryString}`, {
+    const response: I_BaseListResponse<I_Lending> = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/lendings?${queryString}`, {
         method: "GET",
         headers: {
             "Content-Type": "application/json",

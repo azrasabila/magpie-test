@@ -25,9 +25,9 @@ export default function MostBorrowedBook() {
             {data ?
                 data.map((book) => {
                     return (
-                            <Card>
-                                <Flex gap="3" align="center">
-                                    <Heading size="1">{book.borrowCount}</Heading>
+                            <Card className="mb-2" key={book.bookId}>
+                                <Flex gap="5" align="center">
+                                    <Heading size="6">{book.borrowCount}</Heading>
                                     <Box>
                                         <Text as="div" size="2" weight="bold">
                                             {book.bookTitle}

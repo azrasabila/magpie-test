@@ -29,13 +29,13 @@ interface UseBooksParams {
 
 export const useBooks = ({ page = 1, pageSize = 2, search = "", categoryId = "" }: UseBooksParams) => {
     const query = {
-        page: page.toString(),
-        pageSize: pageSize.toString(),
+        page: page,
+        pageSize: pageSize,
         search,
         categoryId,
     }
     return useQuery({
         queryKey: ["books", page, pageSize, search, categoryId],
-        queryFn: async () => await getBookList(query.page, query.pageSize)
+        queryFn: async () => await getBookList(query)
     });
 };

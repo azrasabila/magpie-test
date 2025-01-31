@@ -116,6 +116,7 @@ const booksRoutes: FastifyPluginAsync = async (fastify, opts) => {
           quantity: true,
           category: {
             select: {
+              id: true,
               name: true,
             },
           },

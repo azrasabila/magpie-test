@@ -60,7 +60,8 @@ export default function MemberDialog({ open, onOpenChange, mode, member }: Membe
 
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
-      <Dialog.Content className="p-6 bg-white rounded-lg shadow-md">
+      <Dialog.Overlay className="fixed inset-0 bg-black bg-opacity-50" />
+      <Dialog.Content className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 p-6 bg-white rounded-lg shadow-lg w-96">
         <Dialog.Title>{mode === "edit" ? "Edit Member" : "Add New Member"}</Dialog.Title>
         <Flex direction="column" gap="3" className="mt-4">
           <TextField.Root

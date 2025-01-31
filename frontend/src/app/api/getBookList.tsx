@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { SAPI_GetToken } from "../utils/token";
 
 interface I_BookCategory {
+    id: number
     name: string
 }
 
@@ -12,8 +13,8 @@ interface I_BookStatus {
     borrowedQty: number
 }
 
-interface I_Book {
-    id: string;
+export interface I_Book {
+    id: number;
     title: string;
     author: string;
     isbn: string;
@@ -28,7 +29,7 @@ interface UseBooksParams {
     categoryId?: string;
 }
 
-export async function getBookList(page: string, pageSize: string): Promise<I_ResponseListData<I_Book> | null> {
+export async function getBookList(params: UseBooksParams): Promise<I_ResponseListData<I_Book> | null> {
     const token = await SAPI_GetToken()
 
     if (!token) {
@@ -36,10 +37,10 @@ export async function getBookList(page: string, pageSize: string): Promise<I_Res
     }
 
     const query = {
-        page: page || "1",
-        pageSize: pageSize || "10",
-        search: "",
-        categoryId: ""
+        page: params.page?.toString() || "1",
+        pageSize: params.pageSize?.toString() || "10",
+        search: params.search || "",
+        categoryId: params.categoryId === '0' ? "" : params.categoryId || ""
     }
     const queryString = serialize(query)
     const response: I_BaseListResponse<I_Book> = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/books?${queryString}`, {
